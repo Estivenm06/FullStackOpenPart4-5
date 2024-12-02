@@ -1,0 +1,30 @@
+name: Application deployment
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        types: [opened, synchronize]
+
+jobs:
+    simple_deployment_application:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                node-version: 20
+            - name: Install dependencies
+              run: npm install
+            - name: Run eslint
+              run: npm run lint
+            - name: Run tests
+              run: npm run test
+            - name: Building app
+              run: npm run build
+    tag_release:
+        runs-on: ubuntu-latest
+        needs: [simple_deployment_application]
+        steps:
+            - uses: actions/checkout@v4
