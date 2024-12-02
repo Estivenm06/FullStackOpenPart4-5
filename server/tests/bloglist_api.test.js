@@ -149,7 +149,7 @@ describe('update of a blog', () => {
     const blogsAtEnd = await blogsInDb()
     const likes = blogsAtEnd.map((e) => e.likes)
     expect(likes[0]).toEqual(155)
-  }, 10000)
+  })
 })
 
 describe('With logining status', () => {
