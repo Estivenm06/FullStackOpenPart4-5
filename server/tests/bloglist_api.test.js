@@ -1,11 +1,11 @@
-import bcrypt from "bcryptjs";
-import mongoose from "mongoose";
-import supertest from "supertest";
-import app from "../app.js";
-import blog from "../models/blog.js";
-import user from "../models/user.js";
-const api = supertest(app);
-import { beforeEach, describe, test, afterAll, expect } from "vitest";
+import bcrypt from 'bcryptjs'
+import mongoose from 'mongoose'
+import supertest from 'supertest'
+import app from '../app.js'
+import blog from '../models/blog.js'
+import user from '../models/user.js'
+const api = supertest(app)
+import { beforeEach, describe, test, afterAll, expect } from 'vitest'
 
 import {
   initialBlogs,
@@ -14,27 +14,27 @@ import {
   getInvalidToken,
   usersInDb,
   blogsInDb,
-} from "./test_helper.js";
+} from './test_helper.js'
 
 beforeEach(async () => {
-  await blog.deleteMany({});
-  await user.deleteMany({});
+  await blog.deleteMany({})
+  await user.deleteMany({})
 
-  const saltRounds = 10;
-  const passwordHash = await bcrypt.hash(initialUsers.password, saltRounds);
+  const saltRounds = 10
+  const passwordHash = await bcrypt.hash(initialUsers.password, saltRounds)
   const newUser = new user({
     username: initialUsers.username,
     name: initialUsers.name,
     passwordHash,
-  });
+  })
 
-  const savedUser = await newUser.save();
+  const savedUser = await newUser.save()
   const blogsObjects = initialBlogs.map(
     (e) => new blog({ ...e, user: savedUser.id })
-  );
-  const blogsSaved = blogsObjects.map((e) => e.save());
-  await Promise.all(blogsSaved);
-});
+  )
+  const blogsSaved = blogsObjects.map((e) => e.save())
+  await Promise.all(blogsSaved)
+})
 
 describe('when there\'s initially notes saved', () => {
   test('blogs are returned as json', async () => {
@@ -112,10 +112,10 @@ describe('addition of a new blog', () => {
       likes: initialBlogs[0].likes,
     }
     await api
-    .post('/api/blogs')
-    .set('Authorization', authorization)
-    .send(newBlogMissedUrlAndTitle)
-    .expect(400)
+      .post('/api/blogs')
+      .set('Authorization', authorization)
+      .send(newBlogMissedUrlAndTitle)
+      .expect(400)
   })
 })
 
@@ -142,34 +142,34 @@ describe('update of a blog', () => {
     const blogs = await blogsInDb()
     const blogToUpdate = blogs[0]
     await api
-    .put(`/api/blogs/${blogToUpdate.id}`)
-    .set('Authorization', authorization)
-    .send({ likes: 155 })
-    .expect(200)
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .set('Authorization', authorization)
+      .send({ likes: 155 })
+      .expect(200)
     const blogsAtEnd = await blogsInDb()
     const likes = blogsAtEnd.map((e) => e.likes)
     expect(likes[0]).toEqual(155)
-  }, 10000)
+  })
 })
 
-describe("With logining status", () => {
+describe('With logining status', () => {
   const newBlog = {
-    title: "Canonical string reduction",
-    author: "Edsger W. Dijkstra",
-    url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+    title: 'Canonical string reduction',
+    author: 'Edsger W. Dijkstra',
+    url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
     likes: 12,
-  };
+  }
 
-  test("status code 401 Unauthorized", async () => {
-    const authorization = await getInvalidToken();
+  test('status code 401 Unauthorized', async () => {
+    const authorization = await getInvalidToken()
     await api
-      .post("/api/blogs")
-      .set("Authorization", authorization)
+      .post('/api/blogs')
+      .set('Authorization', authorization)
       .send(newBlog)
-      .expect(401);
-  });
-});
+      .expect(401)
+  })
+})
 
 afterAll(async () => {
-  await mongoose.connection.close();
-});
+  await mongoose.connection.close()
+})

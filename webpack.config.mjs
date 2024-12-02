@@ -1,8 +1,8 @@
 import path from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import webpack from 'webpack'
-import {getGlobals} from 'common-es'
-const {__dirname} = getGlobals(import.meta.url)
+import { getGlobals } from 'common-es'
+const { __dirname } = getGlobals(import.meta.url)
 
 export default (env, argv) => {
   const { mode } = argv
@@ -44,7 +44,7 @@ export default (env, argv) => {
           use: [
             'style-loader',
             'css-loader',
-            'sass-loader', 
+            'sass-loader',
           ]
         }
       ]

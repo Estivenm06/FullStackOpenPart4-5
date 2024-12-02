@@ -13,7 +13,7 @@ const blogSchema = new Schema({
   },
   url: {
     type: String,
-    required: true 
+    required: true
   },
   likes: {
     type: Number,
