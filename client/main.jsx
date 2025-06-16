@@ -1,7 +1,7 @@
 import React from "react"
-import App from "./src/App.jsx"
-import "./src/assets/styles.scss"
 import ReactDOM from "react-dom/client"
+import App from "./src/App.jsx"
+import "./src/styles.css"
 
 const root = ReactDOM.createRoot(document.getElementById("root"))
 root.render(
@@ -9,7 +9,3 @@ root.render(
     <App />
   </React.StrictMode>
 );
-
-if (module.hot) {
-  module.hot.accept()
-}
