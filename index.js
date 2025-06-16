@@ -1,65 +1,46 @@
 import app from './server/app.js'
-import dotenv from 'dotenv'
-import chokidar from 'chokidar'
-import express from 'express'
-import path from 'path'
+import 'dotenv/config'
 import 'express-async-errors'
-import webpack from 'webpack'
-import middleware from 'webpack-dev-middleware'
-import hotmiddleware from 'webpack-hot-middleware'
-import webpackConf from './webpack.config.mjs'
-import { getGlobals } from 'common-es'
-const { __dirname } = getGlobals(import.meta.url)
+import path from 'path'
+import { createServer as createViteServer } from 'vite';
+import { fileURLToPath } from 'url';
 
-dotenv.config()
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 import { PORT, inProduction } from './config/common.js'
 
-app.use('/api', (req, res, next) => require('@root/server')(req, res, next))
-/**
- *  Use "hot loading" in backend
-*/
-
-const watcher = chokidar.watch('server')
-watcher.on('ready', () => {
-  watcher.on('all', () => {
-    Object.keys(require.cache).forEach((id) => {
-      if (id.includes('server')) delete require.cache[id]
-    })
-  })
-})
-
-/*
- * Use "hot loading" in backend
- */
-
 if (!inProduction) {
-  console.log('Development')
-  const compiler = webpack(webpackConf('development', { mode: 'development' }))
+  console.log('Development');
 
-  const devMiddleware = middleware(compiler)
-  app.use(devMiddleware)
-  app.use(hotmiddleware(compiler))
-  app.use('*', (req, res, next) => {
-    const filename = path.join(compiler.outputPath, 'index.html')
-    devMiddleware.waitUntilValid(() => {
-      compiler.outputFileSystem.readFile(filename, (err, result) => {
-        if (err) return next(err)
-        res.set('content-type', 'text/html')
-        res.send(result)
-        return res.end()
-      })
+  (async () => {
+    const vite = await createViteServer({
+      server: { middlewareMode: 'html' },
+      root: path.resolve(__dirname, './'),
+    });
+    app.use(vite.middlewares);
+
+    app.use('*', async (req, res, next) => {
+      res.sendFile(path.resolve(__dirname, './index.html'));
     })
-  })
-} else {
-  console.log('Production')
-  const DIST_PATH = path.resolve(__dirname, './dist')
-  const INDEX_PATH = path.resolve(DIST_PATH, 'index.html')
 
-  app.use(express.static(DIST_PATH))
-  app.get('*', (req, res) => res.sendFile(INDEX_PATH))
+  })();
+} else {
+  console.log('Production');
+  const DIST_PATH = path.resolve(__dirname, '../dist');
+  const INDEX_PATH = path.resolve(DIST_PATH, 'index.html');
+
+  app.use(express.static(DIST_PATH, { extensions: ['html'] }));
+
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(INDEX_PATH);
+    } else {
+      res.status(404).send('Not Found');
+    }
+  });
 }
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on http://localhost:${PORT}`)
 })

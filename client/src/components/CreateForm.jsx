@@ -7,15 +7,16 @@ const CreateForm = ({ createBlog }) => {
 
   const handleCreate = (event) => {
     event.preventDefault()
-    createBlog({
+    const addBlog = createBlog({
       title: title,
       author: author,
       url: url,
     })
-
-    setTitle('')
-    setAuthor('')
-    setUrl('')
+    if(addBlog) {
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+    }
   }
 
   return (
